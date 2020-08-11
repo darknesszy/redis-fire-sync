@@ -1,0 +1,30 @@
+{
+  "name": "redis-fire-sync",
+  "version": "1.0.0",
+  "description": "Synchronise data from Firebase to a Redis database.",
+  "scripts": {
+    "start": "nodemon --watch src --exec ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darknesszy/redis-fire-sync.git"
+  },
+  "author": "Michael May",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/darknesszy/redis-fire-sync/issues"
+  },
+  "homepage": "https://github.com/darknesszy/redis-fire-sync#readme",
+  "devDependencies": {
+    "@types/redis": "^2.8.25",
+    "nodemon": "^2.0.4",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "firebase": "^7.17.2",
+    "redis": "^3.0.2"
+  }
+}
