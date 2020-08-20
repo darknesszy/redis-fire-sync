@@ -1,4 +1,4 @@
-import firebaseapp, { firestore, storage } from 'firebase/app'
+import { firestore, storage } from 'firebase-admin'
 import redisClient from '../utils/redis-client'
 
 let uniqueNum = 0
@@ -137,21 +137,21 @@ const handleReference = (document: { _databaseId: string }) => {
     throw new Error()
 }
 
-const fetchBlobManifest = async (path?: string) => {
-    const blobClient = firebaseapp.storage().ref(path)
-    const list = new Array<string>()
+// const fetchBlobManifest = async (path?: string) => {
+//     const blobClient = storage().ref(path)
+//     const list = new Array<string>()
 
-    try {
-        const manifest = await blobClient.listAll()
-        manifest.items.forEach(ref => list.push(ref.fullPath))
+//     try {
+//         const manifest = await blobClient.listAll()
+//         manifest.items.forEach(ref => list.push(ref.fullPath))
 
-        return list
-    } catch (err) {
-        console.error('err', err)
-    } finally {
-        return list
-    }
-}
+//         return list
+//     } catch (err) {
+//         console.error('err', err)
+//     } finally {
+//         return list
+//     }
+// }
 
 export interface Field {
     key: string

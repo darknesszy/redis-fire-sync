@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "firebase": "^7.17.2",
+    "firebase-admin": "^9.1.0",
     "mime": "^2.4.6",
     "redis": "^3.0.2",
     "xhr2": "^0.2.0"

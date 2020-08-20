@@ -1,8 +1,4 @@
-import firebase, { firestore } from 'firebase/app'
-import 'firebase/analytics'
-import 'firebase/auth'
-import 'firebase/firestore'
-import 'firebase/storage'
+import FirebaseAdmin from 'firebase-admin'
 import dotenv from 'dotenv'
 import redisClient from './utils/redis-client'
 import SyncToRedis from './sync-to-redis'
@@ -14,8 +10,12 @@ global.XMLHttpRequest = require("xhr2")
 
 console.log('# Redis FireSync Initialising...')
 
-// Firebase app setup.
-firebase.initializeApp(require(process.env['FIREBASE_CONFIG_JSON']!))
+// Setup Firebase admin tool.
+FirebaseAdmin.initializeApp({
+    credential: FirebaseAdmin.credential.cert(require(process.env['FIREBASE_PRIVATE_KEY']!)),
+    databaseURL: process.env['FIREBASE_URL']
+})
+
 
 // Redis client setup.
 redisClient.initialiseClient()
