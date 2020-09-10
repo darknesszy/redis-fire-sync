@@ -1,24 +1,20 @@
-import FirebaseAdmin from 'firebase-admin'
+import 'reflect-metadata'
 import dotenv from 'dotenv'
-import redisClient from './utils/redis-client'
-import SyncToRedis from './sync-to-redis'
+import { Container } from 'inversify'
+import { DatabaseSyncer } from './database'
+import { FirestoreClient, RedisClient } from './clients'
 
 const result = dotenv.config()
-if (result.error) throw result.error
+if (!result.error) console.log('Environment Variables from .env is used')
 // Setup XML
 global.XMLHttpRequest = require("xhr2")
 
-console.log('# Redis FireSync Initialising...')
+const serviceProvider = new Container()
+serviceProvider.bind<FirestoreClient>(FirestoreClient).toSelf().inSingletonScope()
+serviceProvider.bind<RedisClient>(RedisClient).toSelf().inSingletonScope()
+serviceProvider.bind<DatabaseSyncer>(DatabaseSyncer).toSelf().inTransientScope()
 
-// Setup Firebase admin tool.
-FirebaseAdmin.initializeApp({
-    credential: FirebaseAdmin.credential.cert(require(process.env['FIREBASE_PRIVATE_KEY']!)),
-    databaseURL: process.env['FIREBASE_URL']
-})
+console.log('# Running Redis FireSync...')
 
-
-// Redis client setup.
-redisClient.initialiseClient()
-
-console.log('# Running sync to redis...')
-SyncToRedis.go()
+const databaseSyncer = serviceProvider.resolve(DatabaseSyncer)
+databaseSyncer.syncToRedis()
