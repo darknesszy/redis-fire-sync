@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import dotenv from 'dotenv'
 import { Container } from 'inversify'
-import { DatabaseSyncer } from './database'
+import { DatabaseETL } from './database'
 import { FirestoreClient, RedisClient } from './clients'
 
 const result = dotenv.config()
@@ -12,9 +12,16 @@ global.XMLHttpRequest = require("xhr2")
 const serviceProvider = new Container()
 serviceProvider.bind<FirestoreClient>(FirestoreClient).toSelf().inSingletonScope()
 serviceProvider.bind<RedisClient>(RedisClient).toSelf().inSingletonScope()
-serviceProvider.bind<DatabaseSyncer>(DatabaseSyncer).toSelf().inTransientScope()
+serviceProvider.bind<DatabaseETL>(DatabaseETL).toSelf().inTransientScope()
 
 console.log('# Running Redis FireSync...')
 
-const databaseSyncer = serviceProvider.resolve(DatabaseSyncer)
-databaseSyncer.syncToRedis()
+const databaseETL = serviceProvider.resolve(DatabaseETL)
+databaseETL.syncToRedis('product', 'name', true)
+.then(() => databaseETL.syncToRedis('promotion', 'body'))
+.then(() => databaseETL.syncToRedis('festival', 'label'))
+.then(() => databaseETL.syncToRedis('faq', 'q'))
+.then(() => databaseETL.syncToRedis('decoration', 'design'))
+.then(() => databaseETL.syncToRedis('article', 'title'))
+.then(() => databaseETL.complete())
+.then(() => console.log('# Done...'))

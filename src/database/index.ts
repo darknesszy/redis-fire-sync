@@ -1,5 +1,5 @@
-import { DatabaseSyncer } from './database-syncer'
+import { DatabaseETL } from './database-etl'
 
 export {
-    DatabaseSyncer
+    DatabaseETL
 }

@@ -1,3 +1,4 @@
+// DEPRECATED
 import { firestore, storage } from 'firebase-admin'
 import redisClient from '../utils/redis-client'
 
@@ -67,7 +68,7 @@ const handleMap = (
     const id = `${root.key}:${root.id}`
     redisClient.connect().addHash([id, ...dict])
     searchKey && typeof data[searchKey] == 'string' && redisClient.connect().addHash(
-        [`${root.key}_indexes`, data[searchKey], root.id]
+        [`${root.key}_indices`, data[searchKey], root.id]
     )
     return id
 }

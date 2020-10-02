@@ -3,25 +3,29 @@ import { firestore } from 'firebase-admin'
 import { FirestoreClient, RedisClient } from '../clients'
 
 @injectable()
-export class DatabaseSyncer {
+export class DatabaseETL {
     @inject(FirestoreClient) private firestoreClient!: FirestoreClient
     @inject(RedisClient) private redisClient!: RedisClient
 
+    private primaryKey: string = 'name'
     private overflow: number = 0
 
-    async syncToRedis() {
-        console.log('# Clearing REDIS database: ', await this.redisClient.connect().clear())
-        
-        const collectionRef = this.firestoreClient.connect().collection('product')
-        await this.syncCollection('product', await collectionRef.get())
+    async syncToRedis(collectionName: string, primaryKey: string, purge?: boolean) {
+        purge && console.log('# Clearing REDIS database: ', await this.redisClient.connect().clear())
+        this.primaryKey = primaryKey
 
+        const collectionRef = this.firestoreClient.connect().collection(collectionName)
+        await this.syncCollection(collectionName, await collectionRef.get())
+    }
+
+    complete() {
         this.firestoreClient.dispose()
         this.redisClient.dispose()
     }
 
     async syncCollection(collectionName: string, snapshots: firestore.QuerySnapshot<firestore.DocumentData>) {
         for await (let doc of snapshots.docs) {
-            this.mapToHash(doc.data(), { key: collectionName, index: doc.id }, 'name')
+            this.mapToHash(doc.data(), { key: collectionName, index: doc.id }, this.primaryKey)
         }
     }
 
@@ -69,7 +73,7 @@ export class DatabaseSyncer {
 
         if(primaryKey != undefined && typeof hashField[primaryKey] == 'string') {
             this.redisClient.connect().addHash(
-                [`${parent.key}_indexes`, hashField[primaryKey], parent.index]
+                [`${parent.key}_indices`, hashField[primaryKey], parent.index]
             )
         }
 
