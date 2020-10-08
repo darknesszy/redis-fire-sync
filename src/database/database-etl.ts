@@ -7,18 +7,26 @@ export class DatabaseETL {
     @inject(FirestoreClient) private firestoreClient!: FirestoreClient
     @inject(RedisClient) private redisClient!: RedisClient
 
-    private primaryKey: string = 'name'
+    private primaryKey?: string
     private overflow: number = 0
 
-    async syncToRedis(collectionName: string, primaryKey: string, purge?: boolean) {
-        purge && console.log('# Clearing REDIS database: ', await this.redisClient.connect().clear())
+    public async syncToRedis(collectionName: string, primaryKey?: string) {
         this.primaryKey = primaryKey
 
         const collectionRef = this.firestoreClient.connect().collection(collectionName)
-        await this.syncCollection(collectionName, await collectionRef.get())
+        try {
+            await this.syncCollection(collectionName, await collectionRef.get())
+            console.log(`# ${collectionName} synced successfully...`)
+        } catch(err) {
+            throw Error(err)
+        }
     }
 
-    complete() {
+    public async clearRedis() {
+        console.log('# Clearing REDIS database: ', await this.redisClient.connect().clear())
+    }
+
+    public complete() {
         this.firestoreClient.dispose()
         this.redisClient.dispose()
     }
@@ -29,7 +37,7 @@ export class DatabaseETL {
         }
     }
 
-    private mapToHash(hashField: firestore.DocumentData, parent: { key: string, index: string }, primaryKey?: string) {
+    protected mapToHash(hashField: firestore.DocumentData, parent: { key: string, index: string }, primaryKey?: string) {
         this.failSafe()
 
         const redisHash = new Array<string>()
@@ -80,7 +88,7 @@ export class DatabaseETL {
         return uuid
     }
 
-    arrayToList(arrayFields: firestore.DocumentData[], parent: { key: string, index: string }) {
+    protected arrayToList(arrayFields: firestore.DocumentData[], parent: { key: string, index: string }) {
         this.failSafe()
 
         if(arrayFields.length == 0) {
