@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/darknesszy/redis-fire-sync#readme",
   "devDependencies": {
+    "@types/minimist": "^1.2.0",
     "@types/redis": "^2.8.25",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
@@ -24,9 +25,10 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "firebase-admin": "^9.1.0",
+    "firebase-admin": "^9.2.0",
     "inversify": "^5.0.1",
     "mime": "^2.4.6",
+    "minimist": "^1.2.5",
     "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
     "xhr2": "^0.2.0"
