@@ -4,6 +4,7 @@ import { Container } from 'inversify'
 import { DatabaseETL } from './database'
 import { FirestoreClient, RedisClient } from './clients'
 import minimist from 'minimist'
+import { interpret } from './utils/collection-interpreter'
 
 const result = dotenv.config()
 if (!result.error) console.log('Environment Variables from .env is used')
@@ -21,17 +22,10 @@ var args = minimist(process.argv.slice(2))
 if (args['database']) {
     const toSync: string | undefined = args['s'] || args['sync']
     if(toSync) {
-        const collections = toSync.split(',').map(el => {
-            const variables = el.split(':')
-            return {
-                name: variables ? variables[0] : el,
-                indexKey: variables ? variables[1] : undefined
-            }
-        })
-
+        const collections = interpret(toSync)
         const databaseETL = serviceProvider.resolve(DatabaseETL)
         collections.reduce(
-            (acc, cur) => acc.then(() => databaseETL.syncToRedis(cur.name, cur.indexKey)),
+            (acc, cur) => acc.then(() => databaseETL.syncToRedis(cur.name, cur.indexKey, cur.condition)),
             databaseETL.clearRedis()
         )
             .then(() => databaseETL.complete())

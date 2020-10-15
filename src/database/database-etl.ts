@@ -8,10 +8,12 @@ export class DatabaseETL {
     @inject(RedisClient) private redisClient!: RedisClient
 
     private primaryKey?: string
+    private condition?: string
     private overflow: number = 0
 
-    public async syncToRedis(collectionName: string, primaryKey?: string) {
+    public async syncToRedis(collectionName: string, primaryKey?: string, condition?: string) {
         this.primaryKey = primaryKey
+        this.condition = condition
 
         const collectionRef = this.firestoreClient.connect().collection(collectionName)
         try {
@@ -33,7 +35,18 @@ export class DatabaseETL {
 
     async syncCollection(collectionName: string, snapshots: firestore.QuerySnapshot<firestore.DocumentData>) {
         for await (let doc of snapshots.docs) {
-            this.mapToHash(doc.data(), { key: collectionName, index: doc.id }, this.primaryKey)
+            const data = doc.data()
+            this.mapToHash(
+                data, 
+                { 
+                    key: collectionName, 
+                    index: doc.id 
+                },
+                // Consider implementing product:price->name to denote conditional indexing.
+                this.condition 
+                    ? data[this.condition] > 0 ? this.primaryKey : undefined
+                    : this.primaryKey
+            )
         }
     }
 
