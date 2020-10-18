@@ -7,7 +7,10 @@ export class RedisClient {
     private client: Client
 
     constructor() {
-        this.client = redis.createClient()
+        this.client = redis.createClient({
+            host: process.env['REDIS_HOST'] || undefined,
+            port: process.env['REDIS_PORT'] ? Number(process.env['REDIS_PORT']) : undefined
+        })
         this.client.on('error', err => console.error(err))
     }
 
